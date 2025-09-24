@@ -41,12 +41,18 @@ fun main() {
 }
 
 fun route(
+    elapsed: Long = System.currentTimeMillis(),
     method: String,
     path: String,
-): String =
-    when {
-        method == "GET" && path == "/" -> "<h1>Hello World</h1>"
-        method == "GET" && path == "/health" -> "OK"
-        method == "GET" && path == "/metrics" -> "metrics"
-        else -> "<h1>404 Not Found</h1>"
-    }
+): String {
+    val body =
+        when {
+            method == "GET" && path == "/" -> "<h1>Hello World</h1>"
+            method == "GET" && path == "/health" -> "OK"
+            method == "GET" && path == "/metrics" -> "metrics"
+            else -> "<h1>404 Not Found</h1>"
+        }
+
+    println("Request handled in ${System.currentTimeMillis() - elapsed}ms")
+    return body
+}
