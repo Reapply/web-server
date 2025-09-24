@@ -1,12 +1,13 @@
 package com.money
 
+
+import com.money.Logger.Companion.error
+import com.money.Logger.Companion.info
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.ServerSocket
 import java.net.Socket
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 
 data class HttpResponse(
@@ -21,11 +22,11 @@ fun main() {
     val pool = Executors.newFixedThreadPool(8)
 
     val elapsed = System.currentTimeMillis() - start
-    log("Server started on ${server.localSocketAddress} in ${elapsed}ms")
+    info("Server started on ${server.localSocketAddress} in ${elapsed}ms")
 
     Runtime.getRuntime().addShutdownHook(
         Thread {
-            log("Shutting down server...")
+            error("Shutting down server...")
             try {
                 server.close()
                 pool.shutdown()
@@ -42,7 +43,7 @@ fun main() {
                 handleClient(client)
             }
         } catch (e: Exception) {
-            log("Server stopped: ${e.message}")
+            error("Server stopped: ${e.message}")
             break
         }
     }
@@ -69,7 +70,7 @@ fun handleClient(client: Socket) {
 
         val method = parts[0]
         val path = parts[1]
-        log("Request: $method $path")
+        info("Request: $method $path")
 
         while (true) {
             val headerLine = reader.readLine() ?: break
@@ -87,9 +88,9 @@ fun handleClient(client: Socket) {
         writer.print(response.body)
         writer.flush()
 
-        log("Request handled in ${duration}ms by ${Thread.currentThread().name}")
+        info("Request handled in ${duration}ms by ${Thread.currentThread().name}")
     } catch (e: Exception) {
-        log("Error: ${e.message}")
+        error("Error: ${e.message}")
     } finally {
         client.close()
     }
@@ -105,7 +106,3 @@ fun route(
         method == "GET" && path == "/metrics" -> HttpResponse("200 OK", """{"requests":42}""", "application/json")
         else -> HttpResponse("404 Not Found", "<h1>404 Not Found</h1>")
     }
-
-fun log(message: String) {
-    println("[${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)}] $message")
-}
